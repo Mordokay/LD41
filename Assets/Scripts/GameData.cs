@@ -131,7 +131,6 @@ public class GameData : MonoBehaviour {
             }
         }
 
-        
         if (savingPlayerData)
         {
             string name = PlayerPrefs.GetString("nickname");

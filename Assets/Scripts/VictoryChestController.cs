@@ -20,7 +20,7 @@ public class VictoryChestController : MonoBehaviour {
             gm.GetComponent<GameData>().savingPlayerData = true;
 
             Debug.Log("Player wins!!!");
-            ui.ShowPlayerWin(other.gameObject.name);
+            ui.ShowPlayerWin();
         }
         else if(other.gameObject.tag.Equals("Enemy"))
         {

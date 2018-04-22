@@ -68,6 +68,10 @@ public class UIManager : MonoBehaviour {
             lastVolume = PlayerPrefs.GetFloat("volume");
             volumeSlider.value = lastVolume;
         }
+        if(PlayerPrefs.HasKey("nickname") && PlayerPrefs.GetString("nickname") != "")
+        {
+            nickname.text = PlayerPrefs.GetString("nickname");
+        }
     }
 	
     public void ShowEnemyWin(string name)
@@ -82,16 +86,16 @@ public class UIManager : MonoBehaviour {
         PlayerPrefs.SetString("nickname", nickname.text);
     }
 
-    public void ShowPlayerWin(string name)
+    public void ShowPlayerWin()
     {
         playerWinPanel.SetActive(true);
         playerWinPanel.GetComponent<Image>().color = winColor;
-        playerWinPanelMessage.text = name + System.Environment.NewLine + "Wins the Game!!!";
+        playerWinPanelMessage.text = PlayerPrefs.GetString("nickname") + System.Environment.NewLine + "Wins the Game!!!";
     }
 
     public void NewGame()
     {
-        if (PlayerPrefs.GetString("nickname") != "")
+        if (PlayerPrefs.GetString("nickname") != "" && PlayerPrefs.GetString("nickname") != "")
         {
             PlayerPrefs.SetInt("loading", 1);
             SceneManager.LoadScene(0);

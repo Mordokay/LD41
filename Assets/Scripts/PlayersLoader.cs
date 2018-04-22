@@ -19,6 +19,7 @@ public class PlayersLoader : MonoBehaviour {
                 player.transform.position = spawnPositions.position;
                 player.GetComponent<PlayerMovementController>().isPlayerControlled = true;
                 players[i] = player;
+                player.name = PlayerPrefs.GetString("nickname");
                 //player.GetComponent<PlayerMovementController>().HideArrows();
                 //Since it is the player playing again we roll the dice to decide how many plays he is going to do.
                 int random = Random.Range(2, 12);
