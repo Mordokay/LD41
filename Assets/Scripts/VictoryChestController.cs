@@ -21,11 +21,15 @@ public class VictoryChestController : MonoBehaviour {
 
             Debug.Log("Player wins!!!");
             ui.ShowPlayerWin();
+
+            gm.GetComponent<GameData>().playerActions.Add(new PlayerMovementController.Action("g", 0));
+            Time.timeScale = 0.0f;
         }
         else if(other.gameObject.tag.Equals("Enemy"))
         {
             Debug.Log("Enemy Wins wins!!!");
             ui.ShowEnemyWin(other.gameObject.name);
+            Time.timeScale = 0.0f;
         }
     }
 }

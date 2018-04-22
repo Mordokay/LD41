@@ -10,6 +10,12 @@ TagManager:
   - Canvas
   - Bullet
   - Spikes
+  - Sand
+  - Rock
+  - Hole
+  - Trap
+  - Boat
+  - Platform
   layers:
   - Default
   - TransparentFX

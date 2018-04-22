@@ -6,7 +6,7 @@ using UnityEngine.UI;
 
 public class UIManager : MonoBehaviour {
 
-    GameObject player;
+    public GameObject player;
     GameObject gm;
     bool muted;
     public Sprite mutedSprite;
@@ -23,13 +23,16 @@ public class UIManager : MonoBehaviour {
     public GameObject muteButtonOnOptions;
     public GameObject continueButton;
 
-    bool gameStarted;
+    public bool gameStarted;
 
     public Color winColor;
     public Color loseColor;
 
     public LayerMask groundLayer;
     public InputField nickname;
+
+    public GameObject endTurnButton;
+    public GameObject waitButton;
 
     void Start () {
         gameStarted = false;
@@ -67,10 +70,17 @@ public class UIManager : MonoBehaviour {
         {
             lastVolume = PlayerPrefs.GetFloat("volume");
             volumeSlider.value = lastVolume;
+            if(lastVolume == 0)
+            {
+                muteButtonOnMenu.GetComponent<Image>().sprite = mutedSprite;
+                muteButtonOnOptions.GetComponent<Image>().sprite = mutedSprite;
+            }
         }
+
         if(PlayerPrefs.HasKey("nickname") && PlayerPrefs.GetString("nickname") != "")
         {
-            nickname.text = PlayerPrefs.GetString("nickname");
+            nickname.text = 
+                PlayerPrefs.GetString("nickname");
         }
     }
 	
@@ -158,6 +168,26 @@ public class UIManager : MonoBehaviour {
                 Time.timeScale = 0.0f;
             }
         }
+
+        if (player != null && gm.GetComponent<GameData>().currentPlayerPlayingId == 0)
+        {
+            if (player.GetComponent<PlayerMovementController>().droppingDown ||
+                player.GetComponent<PlayerMovementController>().moving)
+            {
+                endTurnButton.SetActive(false);
+                waitButton.SetActive(false);
+                //Debug.Log("Deactivate!!!");
+            }
+            else
+            {
+                endTurnButton.SetActive(true);
+                waitButton.SetActive(true);
+            }
+        }
+        else
+        {
+            player = GameObject.FindGameObjectWithTag("Player");
+        }
     }
 
     public void ToggleMute()
@@ -197,6 +227,11 @@ public class UIManager : MonoBehaviour {
             muteButtonOnOptions.GetComponent<Image>().sprite = unmutedSprite;
         }
         AudioListener.volume = volumeSlider.value;
+    }
+
+    public void Wait()
+    {
+        player.GetComponent<PlayerMovementController>().Wait();
     }
 
     public void EndTurn()

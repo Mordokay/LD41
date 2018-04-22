@@ -5,7 +5,6 @@ using UnityEngine.UI;
 
 public class PlayerMovementController : MonoBehaviour
 {
-
     float timeBetweenActions;
     float actionDuration;
     float actionCurrentDuration;
@@ -14,7 +13,7 @@ public class PlayerMovementController : MonoBehaviour
     public bool jumping;
     public bool droppingDown;
     int remainingHorizontalMovementsAfterJump;
-    bool moving;
+    public bool moving;
     Vector3 startPos;
     Vector3 endPos;
 
@@ -39,6 +38,14 @@ public class PlayerMovementController : MonoBehaviour
     public int startStage;
     public bool firstMove;
 
+    GameObject playerBody;
+
+    public Material[] hatMaterials;
+    public Material[] shirtMaterials;
+    public Material[] pantsMaterials;
+
+    public Material trapMaterial;
+
     [System.Serializable]
     public class Action
     {
@@ -60,11 +67,18 @@ public class PlayerMovementController : MonoBehaviour
     //r -> Right
     //f -> Forward
     //b -> Backward
+    //x -> Reverts
     //t -> Finishes Turn
     //g -> Finishes Game
 
     void Start()
     {
+        //hatMaterials = Resources.LoadAll("PlayerMaterials\\Hats") as Material[];
+        //shirtMaterials = Resources.LoadAll("PlayerMaterials\\Shirts") as Material[];
+        //pantsMaterials = Resources.LoadAll("PlayerMaterials\\Pants") as Material[];
+        playerRemainingMoves = 0;
+
+        playerBody = this.transform.GetChild(0).gameObject;
         gm = GameObject.FindGameObjectWithTag("GameManager");
         timeBetweenActions = 1.0f;
         actionDuration = 0.5f;
@@ -79,6 +93,10 @@ public class PlayerMovementController : MonoBehaviour
             HideArrows();
         }
         remainingTurnsText = GameObject.FindGameObjectWithTag("Canvas").transform.GetChild(0).gameObject.GetComponent<Text>();
+
+        playerBody.transform.GetChild(0).gameObject.GetComponent<MeshRenderer>().material = hatMaterials[Random.Range(0, hatMaterials.Length)];
+        playerBody.transform.GetChild(1).gameObject.GetComponent<MeshRenderer>().material = shirtMaterials[Random.Range(0, shirtMaterials.Length)];
+        playerBody.transform.GetChild(2).gameObject.GetComponent<MeshRenderer>().material = pantsMaterials[Random.Range(0, pantsMaterials.Length)];
     }
 
     public void HideArrows()
@@ -93,16 +111,23 @@ public class PlayerMovementController : MonoBehaviour
 
     public void RevertPos()
     {
+        if(moving && gm.GetComponent<GameData>().currentPlayerPlayingId == participantID)
+        {
+            gm.GetComponent<GameData>().playerActions.RemoveAt(gm.GetComponent<GameData>().playerActions.Count - 1);
+        }
         this.transform.position = lastSafePos;
         playerRemainingMoves = 0;
         moving = false;
         jumping = false;
         droppingDown = false;
         firstMove = true;
+        /*
         while(gm.GetComponent<GameData>().playerActions[gm.GetComponent<GameData>().playerActions.Count-1].type != "t")
         {
             gm.GetComponent<GameData>().playerActions.RemoveAt(gm.GetComponent<GameData>().playerActions.Count - 1);
         }
+        */
+        gm.GetComponent<GameData>().playerActions.Add(new PlayerMovementController.Action("x", 0));
         HideArrows();
         gm.GetComponent<GameData>().NextParticipant();
     }
@@ -146,6 +171,21 @@ public class PlayerMovementController : MonoBehaviour
         }
     }
 
+    public void Wait()
+    {
+        if (isPlayerControlled && jumping && remainingHorizontalMovementsAfterJump > 0)
+        {
+            remainingHorizontalMovementsAfterJump -= 1;
+        }
+        moving = true;
+        startPos = this.transform.position;
+        endPos = this.transform.position;
+        actionRemainingTime = timeBetweenActions;
+        actionCurrentDuration = 0.0f;
+        gm.GetComponent<GameData>().playerActions.Add(new PlayerMovementController.Action("w", 0));
+        gm.GetComponent<GameData>().PlayStage();
+    }
+
     public void MoveLeft(float value)
     {
         if (isPlayerControlled && jumping && remainingHorizontalMovementsAfterJump > 0)
@@ -157,6 +197,7 @@ public class PlayerMovementController : MonoBehaviour
         endPos = this.transform.position - Vector3.forward * value;
         actionRemainingTime = timeBetweenActions;
         actionCurrentDuration = 0.0f;
+        playerBody.transform.eulerAngles = new Vector3(0.0f, 0.0f, 0.0f);
     }
 
     public void MoveRight(float value)
@@ -170,6 +211,7 @@ public class PlayerMovementController : MonoBehaviour
         endPos = this.transform.position + Vector3.forward * value;
         actionRemainingTime = timeBetweenActions;
         actionCurrentDuration = 0.0f;
+        playerBody.transform.eulerAngles = new Vector3(0.0f, 180.0f, 0.0f);
     }
     public void MoveUp(float value)
     {
@@ -203,6 +245,7 @@ public class PlayerMovementController : MonoBehaviour
         endPos = this.transform.position - Vector3.right * value;
         actionRemainingTime = timeBetweenActions;
         actionCurrentDuration = 0.0f;
+        playerBody.transform.eulerAngles = new Vector3(0.0f, 90.0f, 0.0f);
     }
     public void MoveBackward(float value)
     {
@@ -215,6 +258,7 @@ public class PlayerMovementController : MonoBehaviour
         endPos = this.transform.position + Vector3.right * value;
         actionRemainingTime = timeBetweenActions;
         actionCurrentDuration = 0.0f;
+        playerBody.transform.eulerAngles = new Vector3(0.0f, -90.0f, 0.0f);
     }
 
     void Update()
@@ -250,6 +294,11 @@ public class PlayerMovementController : MonoBehaviour
                     {
                         if (Physics.Raycast(transform.position, -Vector3.up, out hit, 1.0f, groundLayer))
                         {
+                            if (hit.collider.gameObject.tag.Equals("Trap"))
+                            {
+                                RevertPos();
+                                hit.collider.gameObject.GetComponent<MeshRenderer>().material = trapMaterial;
+                            }
                             jumping = false;
                             droppingDown = false;
                         }
@@ -304,7 +353,7 @@ public class PlayerMovementController : MonoBehaviour
                 if (actionList[0].type.Equals("t"))
                 {
                     //EndTurn
-                    Debug.Log("EndTurn");
+                    //Debug.Log("EndTurn");
                     startStage = (int)actionList[0].value;
                     gm.GetComponent<GameData>().NextParticipant();
                     firstMove = true;
@@ -313,7 +362,7 @@ public class PlayerMovementController : MonoBehaviour
                 else if (actionList[0].type.Equals("g"))
                 {
                     //EndTurn
-                    Debug.Log("EndsGame");
+                    //Debug.Log("EndsGame");
                 }
                 else
                 {
@@ -342,6 +391,12 @@ public class PlayerMovementController : MonoBehaviour
                                 case "b":
                                     MoveBackward(actionList[0].value);
                                     break;
+                                case "x":
+                                    this.transform.position = lastSafePos;
+                                    break;
+                                case "w":
+                                    Wait();
+                                    break;
                             }
                             actionList.RemoveAt(0);
                             firstMove = false;
@@ -368,6 +423,12 @@ public class PlayerMovementController : MonoBehaviour
                                 break;
                             case "b":
                                 MoveBackward(actionList[0].value);
+                                break;
+                            case "x":
+                                this.transform.position = lastSafePos;
+                                break;
+                            case "w":
+                                Wait();
                                 break;
                         }
                         actionList.RemoveAt(0);

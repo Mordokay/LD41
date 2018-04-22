@@ -17,6 +17,7 @@ public class PlayersLoader : MonoBehaviour {
             {
                 GameObject player = Instantiate(Resources.Load("Player")) as GameObject;
                 player.transform.position = spawnPositions.position;
+                player.GetComponent<PlayerMovementController>().lastSafePos = spawnPositions.position;
                 player.GetComponent<PlayerMovementController>().isPlayerControlled = true;
                 players[i] = player;
                 player.name = PlayerPrefs.GetString("nickname");
@@ -29,6 +30,7 @@ public class PlayersLoader : MonoBehaviour {
             {
                 GameObject enemy = Instantiate(Resources.Load("Player")) as GameObject;
                 enemy.transform.position = spawnPositions.position;
+                enemy.GetComponent<PlayerMovementController>().lastSafePos = spawnPositions.position;
                 enemy.GetComponent<PlayerMovementController>().participantID = enemyID;
                 enemy.GetComponent<PlayerMovementController>().isPlayerControlled = false;
                 enemy.tag = "Enemy";

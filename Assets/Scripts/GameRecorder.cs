@@ -20,28 +20,28 @@ public class GameRecorder : MonoBehaviour {
     {
         tableActions = new List<PlayerMovementController.Action>();
         //StartCoroutine(runActions());
-        //StartCoroutine(CreateTable("Mordokay1"));
+        //StartCoroutine(CreateTable("Mordokay3"));
     }
 
     private void Update()
     {
         if (Input.GetKeyDown(KeyCode.M))
         {
-           // StartCoroutine(runActions());
+           //StartCoroutine(runActions());
         }
     }
     IEnumerator runActions()
     {
         //yield return StartCoroutine(CreateTable("Mordokay3"));
 
-        yield return StartCoroutine(PostScores("Mordokay1", "t", "0"));
-        yield return StartCoroutine(PostScores("Mordokay1", "r", "1"));
-        yield return StartCoroutine(PostScores("Mordokay1", "t", "1"));
-        yield return StartCoroutine(PostScores("Mordokay1", "b", "1"));
-        yield return StartCoroutine(PostScores("Mordokay1", "t", "0"));
-        yield return StartCoroutine(PostScores("Mordokay1", "l", "1"));
-        yield return StartCoroutine(PostScores("Mordokay1", "t", "0"));
-        yield return StartCoroutine(PostScores("Mordokay1", "f", "1"));
+        yield return StartCoroutine(PostScores("Mordokay3", "t", "0"));
+        yield return StartCoroutine(PostScores("Mordokay3", "r", "1"));
+        yield return StartCoroutine(PostScores("Mordokay3", "t", "1"));
+        yield return StartCoroutine(PostScores("Mordokay3", "b", "1"));
+        yield return StartCoroutine(PostScores("Mordokay3", "t", "0"));
+        yield return StartCoroutine(PostScores("Mordokay3", "l", "1"));
+        yield return StartCoroutine(PostScores("Mordokay3", "t", "0"));
+        yield return StartCoroutine(PostScores("Mordokay3", "f", "1"));
     }
 
     public IEnumerator PostScores(string tableName, string action, string value)

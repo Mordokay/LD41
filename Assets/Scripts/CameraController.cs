@@ -15,16 +15,17 @@ public class CameraController : MonoBehaviour {
     GameObject player;
 
     public float totalCameraRotation = 0.0f;
-
-    void Start () {
-        player = GameObject.FindGameObjectWithTag("Player");
-        targetPlayer = player;
-        this.transform.position = targetPlayer.transform.position + Vector3.one * currentZoom;
-        transform.LookAt(targetPlayer.transform.position);
-    }
-
+    
     void Update()
     {
+        if(player == null)
+        {
+            player = GameObject.FindGameObjectWithTag("Player");
+            targetPlayer = player;
+            this.transform.position = targetPlayer.transform.position + Vector3.one * currentZoom;
+            transform.LookAt(targetPlayer.transform.position);
+        }
+
         this.transform.position = player.transform.position + Vector3.one * currentZoom;
 
         if (Input.GetKey(KeyCode.A) || Input.GetKey(KeyCode.LeftArrow))

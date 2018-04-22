@@ -22,12 +22,15 @@ public class GameData : MonoBehaviour {
     public List<GameObject> patrolObjects;
 
     public GameObject endTurnButton;
+    public GameObject waitButton;
 
     public Text remainingTurnsText;
+    public LayerMask groundLayer;
 
     public bool savingPlayerData;
-
+    UIManager ui;
     void Start () {
+        ui = GameObject.FindGameObjectWithTag("Canvas").GetComponent<UIManager>();
         stillAtStart = true;
         savingPlayerData = false;
         //Time.timeScale = 0.2f;
@@ -40,6 +43,7 @@ public class GameData : MonoBehaviour {
         if (currentPlayerPlayingId == 0)
         {
             endTurnButton.SetActive(true);
+            waitButton.SetActive(true);
             remainingTurnsText.enabled = true;
         }
         player = GameObject.FindGameObjectWithTag("Player");
@@ -50,7 +54,7 @@ public class GameData : MonoBehaviour {
 
     public void PlayStage()
     {
-        if (!playingStage)
+        if (!playingStage && ui.gameStarted)
         {
             playingStage = true;
             //Plays one stage of every dynamic object
@@ -80,9 +84,10 @@ public class GameData : MonoBehaviour {
             player.GetComponent<PlayerMovementController>().playerRemainingMoves = random;
             remainingTurnsText.text = "Remaining Text: " + random;
 
-            player.GetComponent<PlayerMovementController>().lastSafePos = player.transform.position;
+            //player.GetComponent<PlayerMovementController>().lastSafePos = player.transform.position;
             endTurnButton.SetActive(true);
-            
+            waitButton.SetActive(true);
+
             //Add the turn stage in the begining 
             playerActions.Add(new PlayerMovementController.Action("t", currentStage));
         }
@@ -90,7 +95,18 @@ public class GameData : MonoBehaviour {
         {
             remainingTurnsText.enabled = false;
             endTurnButton.SetActive(false);
+            waitButton.SetActive(false);
             player.GetComponent<PlayerMovementController>().HideArrows();
+        }
+        RaycastHit hit;
+        
+        if (Physics.Raycast(this.GetComponent<PlayersLoader>().players[currentPlayerPlayingId].transform.position, Vector3.down, out hit, 1.0f, groundLayer))
+        {
+            if(!hit.collider.tag.Equals("Boat") && !hit.collider.tag.Equals("Platform"))
+            {
+                this.GetComponent<PlayersLoader>().players[currentPlayerPlayingId].GetComponent<PlayerMovementController>().lastSafePos =
+            this.GetComponent<PlayersLoader>().players[currentPlayerPlayingId].gameObject.transform.position;
+            }
         }
     }
 
@@ -99,6 +115,10 @@ public class GameData : MonoBehaviour {
         if (player == null)
         {
             player = GameObject.FindGameObjectWithTag("Player");
+            if(currentPlayerPlayingId == 0)
+            {
+                player.GetComponent<PlayerMovementController>().playerRemainingMoves = Random.Range(2, 12);
+            }
         }
         else if(stillAtStart)
         {
