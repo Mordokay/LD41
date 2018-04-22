@@ -1,6 +1,7 @@
 ﻿using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
+using UnityEngine.UI;
 
 public class GameData : MonoBehaviour {
 
@@ -22,9 +23,13 @@ public class GameData : MonoBehaviour {
 
     public GameObject endTurnButton;
 
+    public Text remainingTurnsText;
+
+    public bool savingPlayerData;
+
     void Start () {
         stillAtStart = true;
-
+        savingPlayerData = false;
         //Time.timeScale = 0.2f;
 
         playingStage = false;
@@ -32,6 +37,11 @@ public class GameData : MonoBehaviour {
         currentPlayerPlayingId = Random.Range(0, maxPlayers);
         //currentPlayerPlayingId = 0;
 
+        if (currentPlayerPlayingId == 0)
+        {
+            endTurnButton.SetActive(true);
+            remainingTurnsText.enabled = true;
+        }
         player = GameObject.FindGameObjectWithTag("Player");
         playerActions = new List<PlayerMovementController.Action>();
 
@@ -62,13 +72,13 @@ public class GameData : MonoBehaviour {
 
         if (currentPlayerPlayingId == maxPlayers)
         {
-            player.GetComponent<PlayerMovementController>().remainingTurnsText.enabled = true;
+            remainingTurnsText.enabled = true;
             currentPlayerPlayingId = 0;
             player.GetComponent<PlayerMovementController>().RefreshArrows();
             //Since it is the player playing again we roll the dice to decide how many plays he is going to do.
             int random = Random.Range(2, 12);
             player.GetComponent<PlayerMovementController>().playerRemainingMoves = random;
-            player.GetComponent<PlayerMovementController>().remainingTurnsText.text = "Remaining Text: " + random;
+            remainingTurnsText.text = "Remaining Text: " + random;
 
             player.GetComponent<PlayerMovementController>().lastSafePos = player.transform.position;
             endTurnButton.SetActive(true);
@@ -78,7 +88,7 @@ public class GameData : MonoBehaviour {
         }
         else
         {
-            player.GetComponent<PlayerMovementController>().remainingTurnsText.enabled = false;
+            remainingTurnsText.enabled = false;
             endTurnButton.SetActive(false);
             player.GetComponent<PlayerMovementController>().HideArrows();
         }
@@ -121,24 +131,25 @@ public class GameData : MonoBehaviour {
             }
         }
 
-        if (Input.GetKeyDown(KeyCode.Space))
+        
+        if (savingPlayerData)
         {
-            StartCoroutine(runActions());
+            string name = PlayerPrefs.GetString("nickname");
+            StartCoroutine(SavePlayerActions(name));
+
+            savingPlayerData = false;
         }
+        
     }
-
-    IEnumerator runActions()
+    public IEnumerator SavePlayerActions(string playerName)
     {
-        int random = Random.Range(0, 9999);
-        string name = "Mordokay" + random;
-
-        yield return StartCoroutine(this.GetComponent<GameRecorder>().CreateTable(name));
+        yield return StartCoroutine(this.GetComponent<GameRecorder>().CreateTable(playerName));
 
         foreach(PlayerMovementController.Action action in playerActions)
         {
-            yield return StartCoroutine(this.GetComponent<GameRecorder>().PostScores(name, action.type, action.value.ToString()));
+            yield return StartCoroutine(this.GetComponent<GameRecorder>().PostScores(playerName, action.type, action.value.ToString()));
         }
 
-        yield return StartCoroutine(this.GetComponent<GameRecorder>().GetTable(name));
+        //yield return StartCoroutine(this.GetComponent<GameRecorder>().GetTable(name));
     }
 }

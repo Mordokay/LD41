@@ -29,6 +29,7 @@ public class UIManager : MonoBehaviour {
     public Color loseColor;
 
     public LayerMask groundLayer;
+    public InputField nickname;
 
     void Start () {
         gameStarted = false;
@@ -75,6 +76,12 @@ public class UIManager : MonoBehaviour {
         playerWinPanel.GetComponent<Image>().color = loseColor;
         playerWinPanelMessage.text = name + System.Environment.NewLine + "Wins the Game!!!";
     }
+
+    public void UpdateNickname()
+    {
+        PlayerPrefs.SetString("nickname", nickname.text);
+    }
+
     public void ShowPlayerWin(string name)
     {
         playerWinPanel.SetActive(true);
@@ -84,8 +91,11 @@ public class UIManager : MonoBehaviour {
 
     public void NewGame()
     {
-        PlayerPrefs.SetInt("loading", 1);
-        SceneManager.LoadScene(0);
+        if (PlayerPrefs.GetString("nickname") != "")
+        {
+            PlayerPrefs.SetInt("loading", 1);
+            SceneManager.LoadScene(0);
+        }
     }
 
     public void ContinueGame()

@@ -102,7 +102,7 @@ public class GameRecorder : MonoBehaviour {
             for (int i = 0; i < myActions.Length; i++)
             {
                 string[] actionData = myActions[i].Split(' ');
-                tableActions.Add(new PlayerMovementController.Action(actionData[0], float.Parse(actionData[1])));
+                tableActions.Add(new PlayerMovementController.Action(actionData[0].ToString(), float.Parse(actionData[1])));
             }
         }
     }
