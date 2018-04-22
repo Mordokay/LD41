@@ -11,16 +11,16 @@ public class CameraController : MonoBehaviour {
     public float ZoomMax;
     public float currentZoom;
 
-    public Vector3 targetPos;
+    public GameObject targetPlayer;
     GameObject player;
 
-    float totalCameraRotation = 0.0f;
+    public float totalCameraRotation = 0.0f;
 
     void Start () {
         player = GameObject.FindGameObjectWithTag("Player");
-        targetPos = player.transform.position;
-        this.transform.position = targetPos + Vector3.one * currentZoom;
-        transform.LookAt(targetPos);
+        targetPlayer = player;
+        this.transform.position = targetPlayer.transform.position + Vector3.one * currentZoom;
+        transform.LookAt(targetPlayer.transform.position);
     }
 
     void Update()
@@ -53,7 +53,7 @@ public class CameraController : MonoBehaviour {
                 //Camera.main.transform.position = Camera.main.transform.position - Camera.main.transform.forward.normalized * Time.deltaTime * speedZoom;
             }
         }
-        transform.RotateAround(player.transform.position, new Vector3(0.0f, 1.0f, 0.0f), totalCameraRotation);
-        transform.LookAt(player.transform.position);
+        transform.RotateAround(targetPlayer.transform.position, new Vector3(0.0f, 1.0f, 0.0f), totalCameraRotation);
+        transform.LookAt(targetPlayer.transform.position);
     }
 }

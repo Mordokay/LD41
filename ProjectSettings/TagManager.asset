@@ -7,6 +7,9 @@ TagManager:
   - Ground
   - GameManager
   - Enemy
+  - Canvas
+  - Bullet
+  - Spikes
   layers:
   - Default
   - TransparentFX
@@ -17,7 +20,7 @@ TagManager:
   - 
   - 
   - Ground
-  - 
+  - arrow
   - 
   - 
   - 
