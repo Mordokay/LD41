@@ -209,16 +209,19 @@ public class GameData : MonoBehaviour {
                 actionData += playerActions[0].type + ' ' + playerActions[0].value.ToString() + '|';
                 playerActions.RemoveAt(0);
             }
-            actionData = actionData.Substring(0, actionData.Length - 1);
+           // actionData = actionData.Substring(0, actionData.Length - 1);
             //Debug.Log(actionData);
-            StartCoroutine(SaveData(nicknameForSave));
+            //StartCoroutine(SaveData(nicknameForSave));
+            StartCoroutine(CreateTable(nicknameForSave));
+            StartCoroutine(this.GetComponent<GameRecorder>().PostData(nicknameForSave, actionData));
             routineSave = false;
         }
-        
+        /*
         if (Input.GetKeyDown(KeyCode.Space))
         {
             StartCoroutine(this.GetComponent<GameRecorder>().CreateTable(nicknameForSave));
         }
+        */
         
     }
 

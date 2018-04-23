@@ -20,9 +20,7 @@ public class VictoryChestController : MonoBehaviour {
         {
             gm.GetComponent<GameData>().routineSave = true;
             gm.GetComponent<GameData>().posActionSave = 0;
-            string name = PlayerPrefs.GetString("nickname");
-            gm.GetComponent<GameData>().nicknameForSave = name;
-            gm.GetComponent<GameData>().StartCoroutine(gm.GetComponent<GameData>().CreateTable(name));
+            gm.GetComponent<GameData>().nicknameForSave = PlayerPrefs.GetString("nickname");
 
             Debug.Log("Player wins!!!");
             ui.ShowPlayerWin();
