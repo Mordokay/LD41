@@ -39,12 +39,14 @@ public class GameData : MonoBehaviour {
     public int posActionSave;
     public string nicknameForSave;
 
+    string actionData;
+
     void Start () {
         routineSave = false;
         posActionSave = 0;
 
         rollingDices = false;
-
+        actionData = "";
         ui = GameObject.FindGameObjectWithTag("Canvas").GetComponent<UIManager>();
         stillAtStart = true;
         //Time.timeScale = 0.2f;
@@ -198,26 +200,31 @@ public class GameData : MonoBehaviour {
                 }
             }
         }
-        
-        if(routineSave && posActionSave < playerActions.Count)
+        if (routineSave)
         {
-            StartCoroutine(SaveAtPos(nicknameForSave, posActionSave));
-            posActionSave += 1;
-        }
-        else if(posActionSave >= playerActions.Count)
-        {
+            //Debug.Log("playerActions.count: " + playerActions.Count);
+            Debug.Log("playerActions.count: " + actionData.Split('|').Length);
+            while (playerActions.Count > 0)
+            {
+                actionData += playerActions[0].type + ' ' + playerActions[0].value.ToString() + '|';
+                playerActions.RemoveAt(0);
+            }
+            actionData = actionData.Substring(0, actionData.Length - 1);
+            //Debug.Log(actionData);
+            StartCoroutine(SaveData(nicknameForSave));
             routineSave = false;
-            posActionSave = 0;
         }
+        
         if (Input.GetKeyDown(KeyCode.Space))
         {
-            //StartCoroutine(this.GetComponent<GameRecorder>().CreateTable(nicknameForSave));
+            StartCoroutine(this.GetComponent<GameRecorder>().CreateTable(nicknameForSave));
         }
+        
     }
 
-    public IEnumerator SaveAtPos(string playerName, int i)
+    public IEnumerator SaveData(string playerName)
     {
-        yield return StartCoroutine(this.GetComponent<GameRecorder>().PostScores(playerName, playerActions[i].type, playerActions[i].value.ToString()));
+        yield return StartCoroutine(this.GetComponent<GameRecorder>().PostData(playerName, actionData));
     }
 
     public IEnumerator CreateTable (string playerName)

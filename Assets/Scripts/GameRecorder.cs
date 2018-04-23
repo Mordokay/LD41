@@ -30,28 +30,31 @@ public class GameRecorder : MonoBehaviour {
            //StartCoroutine(runActions());
         }
     }
-    IEnumerator runActions()
-    {
+    //IEnumerator runActions()
+    //{
         //yield return StartCoroutine(CreateTable("Mordokay3"));
 
-        yield return StartCoroutine(PostScores("Mordokay3", "t", "0"));
-        yield return StartCoroutine(PostScores("Mordokay3", "r", "1"));
-        yield return StartCoroutine(PostScores("Mordokay3", "t", "1"));
-        yield return StartCoroutine(PostScores("Mordokay3", "b", "1"));
-        yield return StartCoroutine(PostScores("Mordokay3", "t", "0"));
-        yield return StartCoroutine(PostScores("Mordokay3", "l", "1"));
-        yield return StartCoroutine(PostScores("Mordokay3", "t", "0"));
-        yield return StartCoroutine(PostScores("Mordokay3", "f", "1"));
-    }
+        //yield return StartCoroutine(PostScores("Mordokay3", "t", "0"));
+        //yield return StartCoroutine(PostScores("Mordokay3", "r", "1"));
+        //yield return StartCoroutine(PostScores("Mordokay3", "t", "1"));
+        //yield return StartCoroutine(PostScores("Mordokay3", "b", "1"));
+        //yield return StartCoroutine(PostScores("Mordokay3", "t", "0"));
+        //yield return StartCoroutine(PostScores("Mordokay3", "l", "1"));
+        //yield return StartCoroutine(PostScores("Mordokay3", "t", "0"));
+        //yield return StartCoroutine(PostScores("Mordokay3", "f", "1"));
+    //}
 
-    public IEnumerator PostScores(string tableName, string action, string value)
+    public IEnumerator PostData(string tableName, string data)
     {
-        string post_url = addActionToTable + "?actionName=\"" + WWW.EscapeURL(action) + "\"&actionValue=" + WWW.EscapeURL(value) +
-            "&name=" + WWW.EscapeURL(tableName);
+        //string post_url = addActionToTable + "?data=" + WWW.EscapeURL(data) + "&name=" + WWW.EscapeURL(tableName);
+        string post_url = addActionToTable + "?data=" + data + "&name=" + WWW.EscapeURL(tableName);
+        //Debug.Log("datalogged: " + WWW.EscapeURL(data));
 
         // Post the URL to the site and create a download object to get the result.
         WWW hs_post = new WWW(post_url);
         yield return hs_post; // Wait until the download is done
+
+        Debug.Log(hs_post.text);
     }
 
     public IEnumerator GetAllTables()
