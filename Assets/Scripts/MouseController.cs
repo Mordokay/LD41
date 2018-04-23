@@ -7,7 +7,7 @@ public class MouseController : MonoBehaviour {
     public LayerMask arrowLayerMask;
 
 	void Update () {
-        if (Input.GetMouseButtonDown(0))
+        if (Input.GetMouseButtonDown(0) && !this.GetComponent<GameData>().rollingDices)
         {
             RaycastHit hit;
             Ray ray = Camera.main.ScreenPointToRay(Input.mousePosition);

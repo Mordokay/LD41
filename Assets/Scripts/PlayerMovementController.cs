@@ -14,6 +14,7 @@ public class PlayerMovementController : MonoBehaviour
     public bool droppingDown;
     int remainingHorizontalMovementsAfterJump;
     public bool moving;
+    public bool waiting;
     Vector3 startPos;
     Vector3 endPos;
 
@@ -84,6 +85,7 @@ public class PlayerMovementController : MonoBehaviour
         actionDuration = 0.5f;
         canDoAction = true;
         moving = false;
+        waiting = false;
         remainingHorizontalMovementsAfterJump = 0;
         jumping = false;
         droppingDown = false;
@@ -97,6 +99,9 @@ public class PlayerMovementController : MonoBehaviour
         playerBody.transform.GetChild(0).gameObject.GetComponent<MeshRenderer>().material = hatMaterials[Random.Range(0, hatMaterials.Length)];
         playerBody.transform.GetChild(1).gameObject.GetComponent<MeshRenderer>().material = shirtMaterials[Random.Range(0, shirtMaterials.Length)];
         playerBody.transform.GetChild(2).gameObject.GetComponent<MeshRenderer>().material = pantsMaterials[Random.Range(0, pantsMaterials.Length)];
+
+        int random = Random.Range(2, 12);
+        playerRemainingMoves = random;
     }
 
     public void HideArrows()
@@ -111,7 +116,7 @@ public class PlayerMovementController : MonoBehaviour
 
     public void RevertPos()
     {
-        if(moving && gm.GetComponent<GameData>().currentPlayerPlayingId == participantID)
+        if (moving && gm.GetComponent<GameData>().currentPlayerPlayingId == participantID)
         {
             gm.GetComponent<GameData>().playerActions.RemoveAt(gm.GetComponent<GameData>().playerActions.Count - 1);
         }
@@ -178,6 +183,7 @@ public class PlayerMovementController : MonoBehaviour
             remainingHorizontalMovementsAfterJump -= 1;
         }
         moving = true;
+        waiting = true;
         startPos = this.transform.position;
         endPos = this.transform.position;
         actionRemainingTime = timeBetweenActions;
@@ -263,113 +269,155 @@ public class PlayerMovementController : MonoBehaviour
 
     void Update()
     {
-        actionRemainingTime -= Time.deltaTime;
-
-        if (isPlayerControlled)
+        if (!gm.GetComponent<GameData>().rollingDices)
         {
-            //Update UI on remaingin moves
-            remainingTurnsText.text = "Remaining Text: " + playerRemainingMoves;
-        }
-
-        if (moving)
-        {
-            actionCurrentDuration += Time.deltaTime;
-            this.transform.position = Vector3.Lerp(startPos, endPos, actionCurrentDuration / actionDuration);
-            if (actionCurrentDuration >= actionDuration)
+            actionRemainingTime -= Time.deltaTime;
+            if (isPlayerControlled)
             {
-                moving = false;
-                this.transform.position = endPos;
-                //if it was player moving
-                if (gm.GetComponent<GameData>().currentPlayerPlayingId == 0)
-                {
-                    RaycastHit hit;
-                    if (!Physics.Raycast(transform.position, -Vector3.up, out hit, 1.0f, groundLayer) && !jumping)
-                    {
-                        droppingDown = true;
-                        MoveDown(1);
-                        gm.GetComponent<GameData>().playerActions.Add(new PlayerMovementController.Action("d", 1));
-                        gm.GetComponent<GameData>().PlayStage();
-                    }
-                    else
-                    {
-                        if (Physics.Raycast(transform.position, -Vector3.up, out hit, 1.0f, groundLayer))
-                        {
-                            if (hit.collider.gameObject.tag.Equals("Trap"))
-                            {
-                                RevertPos();
-                                hit.collider.gameObject.GetComponent<MeshRenderer>().material = trapMaterial;
-                            }
-                            jumping = false;
-                            droppingDown = false;
-                        }
-                        else
-                        {
-                            if (droppingDown)
-                            {
-                                //continues to more down if it didnt find the floor
-                                MoveDown(1);
-                                gm.GetComponent<GameData>().playerActions.Add(new PlayerMovementController.Action("d", 1));
-                                gm.GetComponent<GameData>().PlayStage();
-                            }
-                        }
+                //Update UI on remaingin moves
+                remainingTurnsText.text = "Remaining Text: " + playerRemainingMoves;
+            }
 
-                        if (remainingHorizontalMovementsAfterJump == 0 && jumping)
+            if (moving)
+            {
+                actionCurrentDuration += Time.deltaTime;
+                RaycastHit hit;
+
+                if (!waiting)
+                {
+                    this.transform.position = Vector3.Lerp(startPos, endPos, actionCurrentDuration / actionDuration);
+                }
+
+                if (actionCurrentDuration >= actionDuration)
+                {
+                    waiting = false;
+                    startPos = this.transform.position;
+                    endPos = this.transform.position;
+                    moving = false;
+                    this.transform.position = endPos;
+                    //if it was player moving
+                    if (gm.GetComponent<GameData>().currentPlayerPlayingId == 0)
+                    {
+                        if (!Physics.Raycast(transform.position, -Vector3.up, out hit, 1.0f, groundLayer) && !jumping)
                         {
-                            //falls down
+                            droppingDown = true;
                             MoveDown(1);
                             gm.GetComponent<GameData>().playerActions.Add(new PlayerMovementController.Action("d", 1));
                             gm.GetComponent<GameData>().PlayStage();
                         }
                         else
                         {
-                            //Decrement Player moves
-                            playerRemainingMoves -= 1;
-
-                            RefreshArrows();
-                            if (playerRemainingMoves <= 0)
+                            if (Physics.Raycast(transform.position, -Vector3.up, out hit, 1.0f, groundLayer))
                             {
-                                if (jumping)
+                                if (hit.collider.gameObject.tag.Equals("Trap"))
                                 {
+                                    RevertPos();
+                                    hit.collider.gameObject.GetComponent<MeshRenderer>().material = trapMaterial;
+                                }
+                                jumping = false;
+                                droppingDown = false;
+                            }
+                            else
+                            {
+                                if (droppingDown)
+                                {
+                                    //continues to more down if it didnt find the floor
                                     MoveDown(1);
                                     gm.GetComponent<GameData>().playerActions.Add(new PlayerMovementController.Action("d", 1));
                                     gm.GetComponent<GameData>().PlayStage();
                                 }
-                                else
+                            }
+
+                            if (remainingHorizontalMovementsAfterJump == 0 && jumping)
+                            {
+                                //falls down
+                                MoveDown(1);
+                                gm.GetComponent<GameData>().playerActions.Add(new PlayerMovementController.Action("d", 1));
+                                gm.GetComponent<GameData>().PlayStage();
+                            }
+                            else
+                            {
+                                //Decrement Player moves
+                                playerRemainingMoves -= 1;
+
+                                RefreshArrows();
+                                if (playerRemainingMoves <= 0)
                                 {
-                                    HideArrows();
-                                    gm.GetComponent<GameData>().NextParticipant();
+                                    if (jumping)
+                                    {
+                                        MoveDown(1);
+                                        gm.GetComponent<GameData>().playerActions.Add(new PlayerMovementController.Action("d", 1));
+                                        gm.GetComponent<GameData>().PlayStage();
+                                    }
+                                    else
+                                    {
+                                        HideArrows();
+                                        gm.GetComponent<GameData>().NextParticipant();
+                                    }
                                 }
                             }
                         }
                     }
                 }
             }
-        }
-        else if (actionList.Count > 0 && !isPlayerControlled &&
-            gm.GetComponent<GameData>().currentPlayerPlayingId == participantID)
-        {
-            if (actionRemainingTime <= 0.0f && canDoAction)
+            else if (actionList.Count > 0 && !isPlayerControlled &&
+                gm.GetComponent<GameData>().currentPlayerPlayingId == participantID)
             {
-                if (actionList[0].type.Equals("t"))
+                if (actionRemainingTime <= 0.0f && canDoAction)
                 {
-                    //EndTurn
-                    //Debug.Log("EndTurn");
-                    startStage = (int)actionList[0].value;
-                    gm.GetComponent<GameData>().NextParticipant();
-                    firstMove = true;
-                    actionList.RemoveAt(0);
-                }
-                else if (actionList[0].type.Equals("g"))
-                {
-                    //EndTurn
-                    //Debug.Log("EndsGame");
-                }
-                else
-                {
-                    gm.GetComponent<GameData>().PlayStage();
-                    if (firstMove)
+                    if (actionList[0].type.Equals("t"))
                     {
-                        if (startStage == gm.GetComponent<GameData>().currentStage)
+                        //EndTurn
+                        //Debug.Log("EndTurn");
+                        startStage = (int)actionList[0].value;
+                        gm.GetComponent<GameData>().NextParticipant();
+                        firstMove = true;
+                        actionList.RemoveAt(0);
+                    }
+                    else if (actionList[0].type.Equals("g"))
+                    {
+                        //EndTurn
+                        //Debug.Log("EndsGame");
+                    }
+                    else
+                    {
+                        gm.GetComponent<GameData>().PlayStage();
+                        if (firstMove)
+                        {
+                            if (startStage == gm.GetComponent<GameData>().currentStage)
+                            {
+                                switch (actionList[0].type)
+                                {
+                                    case "u":
+                                        MoveUp(actionList[0].value);
+                                        break;
+                                    case "d":
+                                        MoveDown(actionList[0].value);
+                                        break;
+                                    case "l":
+                                        MoveLeft(actionList[0].value);
+                                        break;
+                                    case "r":
+                                        MoveRight(actionList[0].value);
+                                        break;
+                                    case "f":
+                                        MoveForward(actionList[0].value);
+                                        break;
+                                    case "b":
+                                        MoveBackward(actionList[0].value);
+                                        break;
+                                    case "x":
+                                        this.transform.position = lastSafePos;
+                                        break;
+                                    case "w":
+                                        Wait();
+                                        break;
+                                }
+                                actionList.RemoveAt(0);
+                                firstMove = false;
+                            }
+                        }
+                        else
                         {
                             switch (actionList[0].type)
                             {
@@ -399,39 +447,7 @@ public class PlayerMovementController : MonoBehaviour
                                     break;
                             }
                             actionList.RemoveAt(0);
-                            firstMove = false;
                         }
-                    }
-                    else
-                    {
-                        switch (actionList[0].type)
-                        {
-                            case "u":
-                                MoveUp(actionList[0].value);
-                                break;
-                            case "d":
-                                MoveDown(actionList[0].value);
-                                break;
-                            case "l":
-                                MoveLeft(actionList[0].value);
-                                break;
-                            case "r":
-                                MoveRight(actionList[0].value);
-                                break;
-                            case "f":
-                                MoveForward(actionList[0].value);
-                                break;
-                            case "b":
-                                MoveBackward(actionList[0].value);
-                                break;
-                            case "x":
-                                this.transform.position = lastSafePos;
-                                break;
-                            case "w":
-                                Wait();
-                                break;
-                        }
-                        actionList.RemoveAt(0);
                     }
                 }
             }

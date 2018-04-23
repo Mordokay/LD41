@@ -6,12 +6,8 @@ public class Invisibility : MonoBehaviour {
 
     public List<GameObject> objectsToSetinvisible;
 
-    public Color color;
-
-    void Start () {
-		
-	}
-
+    public Material mazeRockInvisible;
+    public Material mazeRockNormal;
 
     private void OnTriggerEnter(Collider other)
     {
@@ -20,7 +16,7 @@ public class Invisibility : MonoBehaviour {
             Debug.Log("TriggerInvisibility");
             foreach (GameObject obj in objectsToSetinvisible)
             {
-                obj.GetComponent<MeshRenderer>().material.color = new Color(color.r, color.g, color.b, 40);
+                obj.GetComponent<MeshRenderer>().material = mazeRockInvisible;
             }
         }
     }
@@ -31,7 +27,7 @@ public class Invisibility : MonoBehaviour {
         {
             foreach (GameObject obj in objectsToSetinvisible)
             {
-                obj.GetComponent<MeshRenderer>().material.color = new Color(color.r, color.g, color.b, 255);
+                obj.GetComponent<MeshRenderer>().material = mazeRockNormal;
             }
         }
     }

@@ -4,19 +4,18 @@ using UnityEngine;
 
 public class PlatformController : MonoBehaviour {
 
-    public List<GameObject> playersOnBoat;
-    GameObject gm;
+    public List<GameObject> playersOnPlatform;
 
     private void Start()
     {
-        playersOnBoat = new List<GameObject>();
+        playersOnPlatform = new List<GameObject>();
     }
 
     private void OnTriggerEnter(Collider other)
     {
         if (other.gameObject.tag.Equals("Player") || other.gameObject.tag.Equals("Enemy"))
         {
-            playersOnBoat.Add(other.gameObject);
+            playersOnPlatform.Add(other.gameObject);
             Debug.Log("TriggeringEnter!!!");
         }
     }
@@ -26,7 +25,7 @@ public class PlatformController : MonoBehaviour {
         if (other.gameObject.tag.Equals("Player") || other.gameObject.tag.Equals("Enemy"))
         {
             Debug.Log("TriggeringExit!!!");
-            playersOnBoat.Remove(other.gameObject);
+            playersOnPlatform.Remove(other.gameObject);
         }
     }
 

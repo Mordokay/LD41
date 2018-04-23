@@ -46,9 +46,10 @@ public class Patrol : MonoBehaviour {
         if (this.gameObject.tag.Equals("Boat") || this.gameObject.tag.Equals("Platform"))
         {
             playersToMove.Clear();
-            foreach (GameObject player in this.GetComponentInChildren<PlatformController>().playersOnBoat)
+            foreach (GameObject player in this.GetComponentInChildren<PlatformController>().playersOnPlatform)
             {
-                if (player.GetComponent<PlayerMovementController>().participantID != gd.currentPlayerPlayingId)
+                if (player.GetComponent<PlayerMovementController>().participantID != gd.currentPlayerPlayingId ||
+                    player.GetComponent<PlayerMovementController>().waiting)
                 {
                     playersToMove.Add(player);
                 }
