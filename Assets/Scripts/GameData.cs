@@ -99,7 +99,7 @@ public class GameData : MonoBehaviour {
         //Since it is the player playing again we roll the dice to decide how many plays he is going to do.
 
         player.GetComponent<PlayerMovementController>().playerRemainingMoves = diceCount;
-        remainingTurnsText.text = "Remaining Text: " + diceCount;
+        remainingTurnsText.text = "Remaining Moves: " + diceCount;
 
         //Add the turn stage in the begining 
         playerActions.Add(new PlayerMovementController.Action("t", currentStage));
@@ -140,6 +140,16 @@ public class GameData : MonoBehaviour {
             endTurnButton.SetActive(false);
             waitButton.SetActive(false);
             player.GetComponent<PlayerMovementController>().HideArrows();
+            RaycastHit hit;
+
+            if (Physics.Raycast(this.GetComponent<PlayersLoader>().players[currentPlayerPlayingId].transform.position, Vector3.down, out hit, 1.0f, groundLayer))
+            {
+                if (!hit.collider.tag.Equals("Boat") && !hit.collider.tag.Equals("Platform"))
+                {
+                    this.GetComponent<PlayersLoader>().players[currentPlayerPlayingId].GetComponent<PlayerMovementController>().lastSafePos =
+                this.GetComponent<PlayersLoader>().players[currentPlayerPlayingId].gameObject.transform.position;
+                }
+            }
         }
     }
 

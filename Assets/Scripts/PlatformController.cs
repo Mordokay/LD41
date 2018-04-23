@@ -16,7 +16,7 @@ public class PlatformController : MonoBehaviour {
         if (other.gameObject.tag.Equals("Player") || other.gameObject.tag.Equals("Enemy"))
         {
             playersOnPlatform.Add(other.gameObject);
-            Debug.Log("TriggeringEnter!!!");
+            //Debug.Log("TriggeringEnter!!!");
         }
     }
 
@@ -24,7 +24,7 @@ public class PlatformController : MonoBehaviour {
     {
         if (other.gameObject.tag.Equals("Player") || other.gameObject.tag.Equals("Enemy"))
         {
-            Debug.Log("TriggeringExit!!!");
+            //Debug.Log("TriggeringExit!!!");
             playersOnPlatform.Remove(other.gameObject);
         }
     }

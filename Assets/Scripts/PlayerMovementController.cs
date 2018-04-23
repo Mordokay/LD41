@@ -126,12 +126,7 @@ public class PlayerMovementController : MonoBehaviour
         jumping = false;
         droppingDown = false;
         firstMove = true;
-        /*
-        while(gm.GetComponent<GameData>().playerActions[gm.GetComponent<GameData>().playerActions.Count-1].type != "t")
-        {
-            gm.GetComponent<GameData>().playerActions.RemoveAt(gm.GetComponent<GameData>().playerActions.Count - 1);
-        }
-        */
+
         gm.GetComponent<GameData>().playerActions.Add(new PlayerMovementController.Action("x", 0));
         HideArrows();
         gm.GetComponent<GameData>().NextParticipant();
@@ -178,6 +173,8 @@ public class PlayerMovementController : MonoBehaviour
 
     public void Wait()
     {
+        RaycastHit hit;
+
         if (isPlayerControlled && jumping && remainingHorizontalMovementsAfterJump > 0)
         {
             remainingHorizontalMovementsAfterJump -= 1;
@@ -188,7 +185,13 @@ public class PlayerMovementController : MonoBehaviour
         endPos = this.transform.position;
         actionRemainingTime = timeBetweenActions;
         actionCurrentDuration = 0.0f;
-        gm.GetComponent<GameData>().playerActions.Add(new PlayerMovementController.Action("w", 0));
+
+        Physics.Raycast(transform.position, -Vector3.up, out hit, 1.0f, groundLayer);
+        if (isPlayerControlled && hit.collider != null && !hit.collider.gameObject.tag.Equals("Boat") && !hit.collider.gameObject.tag.Equals("Platform"))
+        {
+            gm.GetComponent<GameData>().playerActions.Add(new PlayerMovementController.Action("w", 0));
+        }
+        
         gm.GetComponent<GameData>().PlayStage();
     }
 
@@ -275,7 +278,7 @@ public class PlayerMovementController : MonoBehaviour
             if (isPlayerControlled)
             {
                 //Update UI on remaingin moves
-                remainingTurnsText.text = "Remaining Text: " + playerRemainingMoves;
+                remainingTurnsText.text = "Remaining Moves: " + playerRemainingMoves;
             }
 
             if (moving)
@@ -298,6 +301,12 @@ public class PlayerMovementController : MonoBehaviour
                     //if it was player moving
                     if (gm.GetComponent<GameData>().currentPlayerPlayingId == 0)
                     {
+                        if (Physics.Raycast(transform.position, -Vector3.up, out hit, 1.0f, groundLayer))
+                        {
+                            droppingDown = false;
+                            jumping = false;
+                        }
+
                         if (!Physics.Raycast(transform.position, -Vector3.up, out hit, 1.0f, groundLayer) && !jumping)
                         {
                             droppingDown = true;
@@ -307,26 +316,22 @@ public class PlayerMovementController : MonoBehaviour
                         }
                         else
                         {
-                            if (Physics.Raycast(transform.position, -Vector3.up, out hit, 1.0f, groundLayer))
+                            if (Physics.Raycast(transform.position, -Vector3.up, out hit, 1.0f, groundLayer) && 
+                                hit.collider.gameObject.tag.Equals("Trap"))
                             {
-                                if (hit.collider.gameObject.tag.Equals("Trap"))
-                                {
-                                    RevertPos();
-                                    hit.collider.gameObject.GetComponent<MeshRenderer>().material = trapMaterial;
-                                }
-                                jumping = false;
-                                droppingDown = false;
+                                RevertPos();
+                                hit.collider.gameObject.GetComponent<MeshRenderer>().material = trapMaterial;
                             }
                             else
                             {
-                                if (droppingDown)
+                                if (!Physics.Raycast(transform.position, -Vector3.up, out hit, 1.0f, groundLayer) && droppingDown)
                                 {
                                     //continues to more down if it didnt find the floor
                                     MoveDown(1);
                                     gm.GetComponent<GameData>().playerActions.Add(new PlayerMovementController.Action("d", 1));
                                     gm.GetComponent<GameData>().PlayStage();
                                 }
-                            }
+                            
 
                             if (remainingHorizontalMovementsAfterJump == 0 && jumping)
                             {
@@ -355,6 +360,7 @@ public class PlayerMovementController : MonoBehaviour
                                         gm.GetComponent<GameData>().NextParticipant();
                                     }
                                 }
+                            }
                             }
                         }
                     }

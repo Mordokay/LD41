@@ -10,7 +10,7 @@ public class Crusher : MonoBehaviour {
         {
             //Pushes player back to start position
             other.gameObject.GetComponent<PlayerMovementController>().RevertPos();
-            Debug.Log("RevertingPos");
+            //Debug.Log("RevertingPos");
         }
     }
 }
