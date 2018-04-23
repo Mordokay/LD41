@@ -33,15 +33,20 @@ public class GameData : MonoBehaviour {
     public GameObject DiceCamera;
     public GameObject MainCamera;
 
-    public bool savingPlayerData;
     UIManager ui;
 
+    public bool routineSave;
+    public int posActionSave;
+    public string nicknameForSave;
+
     void Start () {
+        routineSave = false;
+        posActionSave = 0;
+
         rollingDices = false;
 
         ui = GameObject.FindGameObjectWithTag("Canvas").GetComponent<UIManager>();
         stillAtStart = true;
-        savingPlayerData = false;
         //Time.timeScale = 0.2f;
 
         playingStage = false;
@@ -193,25 +198,30 @@ public class GameData : MonoBehaviour {
                 }
             }
         }
-
-        if (savingPlayerData)
-        {
-            string name = PlayerPrefs.GetString("nickname");
-            StartCoroutine(SavePlayerActions(name));
-
-            savingPlayerData = false;
-        }
         
+        if(routineSave && posActionSave < playerActions.Count)
+        {
+            StartCoroutine(SaveAtPos(nicknameForSave, posActionSave));
+            posActionSave += 1;
+        }
+        else if(posActionSave >= playerActions.Count)
+        {
+            routineSave = false;
+            posActionSave = 0;
+        }
+        if (Input.GetKeyDown(KeyCode.Space))
+        {
+            //StartCoroutine(this.GetComponent<GameRecorder>().CreateTable(nicknameForSave));
+        }
     }
-    public IEnumerator SavePlayerActions(string playerName)
+
+    public IEnumerator SaveAtPos(string playerName, int i)
+    {
+        yield return StartCoroutine(this.GetComponent<GameRecorder>().PostScores(playerName, playerActions[i].type, playerActions[i].value.ToString()));
+    }
+
+    public IEnumerator CreateTable (string playerName)
     {
         yield return StartCoroutine(this.GetComponent<GameRecorder>().CreateTable(playerName));
-
-        foreach(PlayerMovementController.Action action in playerActions)
-        {
-            yield return StartCoroutine(this.GetComponent<GameRecorder>().PostScores(playerName, action.type, action.value.ToString()));
-        }
-
-        //yield return StartCoroutine(this.GetComponent<GameRecorder>().GetTable(name));
     }
 }
