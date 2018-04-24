@@ -81,7 +81,7 @@ public class PlayerMovementController : MonoBehaviour
 
         playerBody = this.transform.GetChild(0).gameObject;
         gm = GameObject.FindGameObjectWithTag("GameManager");
-        timeBetweenActions = 1.0f;
+        timeBetweenActions = 0.7f;
         actionDuration = 0.5f;
         canDoAction = true;
         moving = false;
